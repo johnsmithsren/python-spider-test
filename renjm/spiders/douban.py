@@ -21,7 +21,6 @@ class DmozSpider(scrapy.Spider):
     start_urls = ['http://www.biqukan.com']
 
     def parse(self, response):
-        # 获取单页中所有漫画的url
         comics_url_list = []
         com_count = response.xpath("//li/span[@class='s2']")
         for i in com_count:
@@ -47,7 +46,7 @@ class DmozSpider(scrapy.Spider):
             yield scrapy.Request(next_page, callback=self.content_parse)
 
     def save(self, title, content, folderName):
-        document = os.path.join(os.getcwd(), 'cartoon')
+        document = os.path.join(os.getcwd(), 'Content')
         folder_path = os.path.join(document, folderName)
         print('\n>>>>>>>>>>>>>>>>>>> folder_path  <<<<<<<<<<<<<<<<<<<<' +
               folder_path)
@@ -56,10 +55,13 @@ class DmozSpider(scrapy.Spider):
             print('create document: ' + folderName)
             os.makedirs(folder_path)
         fileName = folder_path + '/' + title + '.txt'
-        with codecs.open(fileName, 'a', encoding='utf-8') as fp:
-            c = json.dumps(content, ensure_ascii=False) + "\n"
-            c = unicode.encode(c, 'utf-8')
-            fp.write(json.loads(c))
+        with codecs.open(fileName, 'a+', encoding='utf-8') as fp:
+            for i in content:
+                c = json.dumps(i, ensure_ascii=False)
+                c = unicode.encode(c, 'utf-8')
+                fp.write(json.loads(c))
+                if (i == '\r'):
+                    fp.write("\n")
 
     def content_parse(self, response):
         subSelector = response.xpath('//div[@class="content"]')
@@ -69,5 +71,5 @@ class DmozSpider(scrapy.Spider):
             t = sub.xpath('./h1/text()').extract_first()
             print('\n>>>>>>>>>>>>>>>>>>> Ttile <<<<<<<<<<<<<<<<<<<<' + t)
             content = sub.xpath('./div[@class="showtxt"]').xpath(
-                'string(.)').extract()[0].replace('\r', '').strip()
+                'string(.)').extract()[0].strip()
             self.save(t, content, folderName)
