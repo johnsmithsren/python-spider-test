@@ -10,7 +10,6 @@ import codecs
 import requests
 import os
 reload(sys)
-
 sys.setdefaultencoding('utf-8')
 
 
