@@ -8,8 +8,9 @@ import time
 import json
 import codecs
 import sys
-reload(sys)
-sys.setdefaultencoding('utf-8')
+import importlib
+importlib.reload(sys)
+# sys.setdefaultencoding('utf-8')
 
 
 class RenjmPipeline(object):
