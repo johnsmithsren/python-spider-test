@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
-dirs = "/Users/renjm/Desktop/test/"
-mp4 = "/Users/renjm/Desktop/mp4/"
-command1="ffmpeg -re -allowed_extensions ALL -protocol_whitelist 'file,http,crypto,tcp' -i '%sindex.m3u8' -c  copy out.ts" %dirs
-os.system(command1)
+dirs = "/Users/renjm/Downloads/test/"
+mp4 = "/Users/renjm/Downloads/mp4/"
+# command1="ffmpeg -re -allowed_extensions ALL -protocol_whitelist 'file,http,crypto,tcp' -i '%sindex.m3u8' -c  copy out.ts" %dirs
+# os.system(command1)
 #ts文件绝对路径
  #读取ts文件夹下所有的ts文件
 path_list = os.listdir(dirs)
@@ -11,8 +11,15 @@ path_list = os.listdir(dirs)
 path_list.sort()
  #将排序后的ts的绝对路径放入列表中
 li = [os.path.join(dirs,filename) for filename in path_list]
+cmd = ''
+for file in li:
+    if file != '/Users/renjm/Downloads/test/.DS_Store' and  file != '/Users/renjm/Downloads/test/vodkey.bin' and file!='/Users/renjm/Downloads/test/index.m3u8'and file!='/Users/renjm/Downloads/test/index.dl':
+        file_path = os.path.join(dirs, file)
+        cmd += file_path + '|'
+            # print("文件：%s"%file_path)
+cmd = cmd[:-1]
  #类似于[001.ts|00.2ts|003.ts]
-input_file = '|'.join(li)
+input_file = cmd
  #指定输出文件名称
 output_file = dirs+'1' + '.mp4'
  #使用ffmpeg将ts合并为mp4

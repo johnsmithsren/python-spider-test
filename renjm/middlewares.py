@@ -6,7 +6,8 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-
+from scrapy.http import HtmlResponse
+from selenium import webdriver
 
 class RenjmSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -78,6 +79,16 @@ class RenjmDownloaderMiddleware(object):
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
+        if spider.name == "image":
+            # html = " "  # 定义一个html字符串储存下载的html
+            if 'notHtml' in request.meta:
+                return
+            print("PhantomJS is starting...")
+            driver = webdriver.PhantomJS()  # 使用PhantomJS浏览器
+            driver.get(request.url)
+            # html = html + driver.page_source  # 第一页html储存在html字符串里
+            print("访问" + request.url)
+            return HtmlResponse(request.url, body=driver.page_source, encoding='utf-8', request=request)
         return None
 
     def process_response(self, request, response, spider):

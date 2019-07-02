@@ -17,3 +17,6 @@ class RenjmItem(scrapy.Item):
     Href = scrapy.Field()
     Content = scrapy.Field()
     Title = scrapy.Field()
+    image_urls = scrapy.Field()
+    images = scrapy.Field()
+    image_paths = scrapy.Field()

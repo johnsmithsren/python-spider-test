@@ -7,47 +7,81 @@ import sys
 # from scrapy.selector import Selector
 import json
 import codecs
-# import requests
+import os
+import requests
 import importlib
 importlib.reload(sys)
+from PIL import Image
 # sys.setdefaultencoding('utf-8')
 ## 下载一拳超人漫画
-
+import io
+from io import BytesIO
 
 class ImageSpider(scrapy.Spider):
     name = "image"
     USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
-    start_urls = ['https://manhua.fzdm.com/132/']
-    headUrl = 'https://manhua.fzdm.com/132/'
+    start_urls = ['https://manhua.fzdm.com/132/151/']
 
     def parse(self, response):
-        headUrl = 'https://manhua.fzdm.com/132/'
+        headUrl = 'https://manhua.fzdm.com/132/151/'
         comics_url_list = []
-        com_count = response.xpath("//li[@class='pure-u-1-2 pure-u-lg-1-4']")
+        com_count = response.xpath("//*[@id='pjax-container']/div[@class='navigation']")
         for i in com_count:
             com_url = i.xpath("./a/@href").extract()
-            url = headUrl + com_url[0]
-            comics_url_list.append(url)
+            p = './a[%s]/text()' % (len(com_url) - 2)
+            l = len(com_url) - 2
+            comText = i.xpath(p).extract()
+            if len(comText) is 0:
+                p = './a[%s]/text()' % (len(com_url) - 1)
+                l = len(com_url) - 1
+                comText = i.xpath(p).extract()
+            if comText[0] != '下一页' and comText[0] != '上一页':
+                url = headUrl + com_url[l-1]
+                comics_url_list.append(url)
         print('\n>>>>>>>>>>>>>>>>>>> current page  list <<<<<<<<<<<<<<<<<<<<')
         print(comics_url_list)
         for url in comics_url_list:
             print('>>>>>>>> 动漫解析:' + url)
-            yield scrapy.Request(url=url, callback=self.comics_parse)
+            _requests = scrapy.Request(url, callback=self.comics_parse)
+            _requests.meta['PhantomJS'] = True
+            yield _requests
 
     def comics_parse(self, response):
+        comicImageUrl = response.xpath('//*[@id="mhpic"]/@src').extract()
+        next_com_urls = response.xpath("//*[@id='pjax-container']/div[@class='navigation']")
+        headUrl = 'https://manhua.fzdm.com/132/151/'
+        next_comics_url_list = []
+        for i in next_com_urls:
+            com_url = i.xpath("./a/@href").extract()
+            p = './a[%s]/text()' % (len(com_url)-1)
+            comText = i.xpath(p).extract()
+            l = (len(com_url)-1)
+            if comText[0] !='下一页':
+                p = './a[%s]/text()' % (len(com_url))
+                l = len(com_url)
+                comText = i.xpath(p).extract()
+            if comText[0] == '下一页':
+                url = headUrl +com_url[l-1]
+                next_comics_url_list.append(url)
+        print(comicImageUrl)
+        self.comicTitle = comicImageUrl[0]
+        _requests =scrapy.Request(comicImageUrl[0], callback=self.content_parse)
+        _requests.meta['notHtml'] = True
+        yield _requests
+        if len(next_comics_url_list) !=0:
+            self.comicTitle = next_comics_url_list[0]
+            _requests = scrapy.Request(next_comics_url_list[0], callback=self.comics_parse)
+            _requests.meta['PhantomJS'] = True
+            yield _requests
 
-        subSelector = response.xpath('//*[@id="mhpic"]')
-        for sub in subSelector:
-            href = sub.xpath('./a/@href').extract_first()
-            next_page = response.urljoin('http://www.biqukan.com' + href)
-            print(
-                '\n>>>>>>>>>>>>>>>>>>> current next page   <<<<<<<<<<<<<<<<<<<<'
-                + next_page)
 
-            yield scrapy.Request(next_page, callback=self.content_parse)
+    def content_parse(self, response):
+        folderName ='151'
+        self.save(self.comicTitle, response, folderName)
+
 
     def save(self, title, content, folderName):
-        document = os.path.join(os.getcwd(), 'Content')
+        document = os.path.join(os.getcwd(), 'Comic')
         folder_path = os.path.join(document, folderName)
         print('\n>>>>>>>>>>>>>>>>>>> folder_path  <<<<<<<<<<<<<<<<<<<<' +
               folder_path)
@@ -55,22 +89,9 @@ class ImageSpider(scrapy.Spider):
         if not exists:
             print('create document: ' + folderName)
             os.makedirs(folder_path)
-        fileName = folder_path + '/' + title + '.txt'
-        with codecs.open(fileName, 'a+', encoding='utf-8') as fp:
-            for i in content:
-                c = json.dumps(i, ensure_ascii=False)
-                c = unicode.encode(c, 'utf-8')
-                fp.write(json.loads(c))
-                if (i == '\r'):
-                    fp.write("\n")
-
-    def content_parse(self, response):
-        subSelector = response.xpath('//div[@class="content"]')
-        folderName = response.xpath(
-            '//div[@class="p"]/a[2]/text()').extract_first()
-        for sub in subSelector:
-            t = sub.xpath('./h1/text()').extract_first()
-            print('\n>>>>>>>>>>>>>>>>>>> Ttile <<<<<<<<<<<<<<<<<<<<' + t)
-            content = sub.xpath('./div[@class="showtxt"]').xpath(
-                'string(.)').extract()[0].strip()
-            self.save(t, content, folderName)
+        fileName = folder_path + '/' + title.split('/')[-1] + '.jpg'
+        url = content.url
+        response = requests.get(url)
+        if response.status_code == 200:
+            with open(fileName, 'wb') as f:
+                f.write(response.content)

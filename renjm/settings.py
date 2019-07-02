@@ -57,6 +57,7 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy_splash.SplashMiddleware': 725,
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware':
     810,
+    'renjm.middlewares.RenjmDownloaderMiddleware': 543,
 }
 DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
 HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
