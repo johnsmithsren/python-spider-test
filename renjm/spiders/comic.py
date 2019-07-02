@@ -11,7 +11,9 @@ import os
 import requests
 import importlib
 importlib.reload(sys)
+import img2pdf
 from PIL import Image
+from fpdf import FPDF
 # sys.setdefaultencoding('utf-8')
 ## 下载一拳超人漫画
 import io
@@ -20,10 +22,11 @@ from io import BytesIO
 class ImageSpider(scrapy.Spider):
     name = "image"
     USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
-    start_urls = ['https://manhua.fzdm.com/132/151/']
+    start_urls = ['https://manhua.fzdm.com/132/151']
+    headUrl = 'https://manhua.fzdm.com/132/151/'
 
     def parse(self, response):
-        headUrl = 'https://manhua.fzdm.com/132/151/'
+        headUrl = self.headUrl
         comics_url_list = []
         com_count = response.xpath("//*[@id='pjax-container']/div[@class='navigation']")
         for i in com_count:
@@ -49,7 +52,7 @@ class ImageSpider(scrapy.Spider):
     def comics_parse(self, response):
         comicImageUrl = response.xpath('//*[@id="mhpic"]/@src').extract()
         next_com_urls = response.xpath("//*[@id='pjax-container']/div[@class='navigation']")
-        headUrl = 'https://manhua.fzdm.com/132/151/'
+        headUrl =  self.headUrl
         next_comics_url_list = []
         for i in next_com_urls:
             com_url = i.xpath("./a/@href").extract()
@@ -78,7 +81,7 @@ class ImageSpider(scrapy.Spider):
 
 
     def content_parse(self, response):
-        folderName ='151'
+        folderName = self.headUrl.split('/')[-2]
         title = response.meta['comicTitle']
         self.save(title, response, folderName)
 
@@ -98,3 +101,15 @@ class ImageSpider(scrapy.Spider):
         if response.status_code == 200:
             with open(fileName, 'wb') as f:
                 f.write(response.content)
+        comicFolder = os.path.join(os.getcwd(), 'Comic')
+        for i in os.listdir(comicFolder):
+            if i == ".DS_Store":
+                return
+            imgArray = []
+            for f in os.listdir(os.path.join(comicFolder, i)):
+                if f.endswith(".jpg"):
+                    imgArray.append(os.path.join(os.path.join(comicFolder, i), f))
+            pdf_bytes = img2pdf.convert(imgArray)
+            file = open(os.path.join(comicFolder, i) + ".pdf", 'wb')
+            file.write(pdf_bytes)
+            file.close()
