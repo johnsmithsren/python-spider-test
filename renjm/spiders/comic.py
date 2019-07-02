@@ -67,17 +67,20 @@ class ImageSpider(scrapy.Spider):
         self.comicTitle = comicImageUrl[0]
         _requests =scrapy.Request(comicImageUrl[0], callback=self.content_parse)
         _requests.meta['notHtml'] = True
+        _requests.meta['comicTitle'] = next_comics_url_list[0]
         yield _requests
         if len(next_comics_url_list) !=0:
             self.comicTitle = next_comics_url_list[0]
             _requests = scrapy.Request(next_comics_url_list[0], callback=self.comics_parse)
             _requests.meta['PhantomJS'] = True
+            _requests.meta['comicTitle'] = next_comics_url_list[0]
             yield _requests
 
 
     def content_parse(self, response):
         folderName ='151'
-        self.save(self.comicTitle, response, folderName)
+        title = response.meta['comicTitle']
+        self.save(title, response, folderName)
 
 
     def save(self, title, content, folderName):
