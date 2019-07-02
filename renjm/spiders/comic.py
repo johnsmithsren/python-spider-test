@@ -18,12 +18,25 @@ from fpdf import FPDF
 ## 下载一拳超人漫画
 import io
 from io import BytesIO
-
+from lxml import html
 class ImageSpider(scrapy.Spider):
     name = "image"
     USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
-    start_urls = ['https://manhua.fzdm.com/132/151']
+    # start_urls = ['https://manhua.fzdm.com/132/151']
+    startUrl = 'https://manhua.fzdm.com/132/'
     headUrl = 'https://manhua.fzdm.com/132/151/'
+
+    def start_requests(self):
+        startUrls  =html.fromstring( requests.get(self.startUrl).text)
+        start = startUrls.xpath('//*[@id="content"]/li/a/@href')
+        start_urls = []
+        for url in start:
+            exists = os.path.exists(os.path.join(os.getcwd(), 'Comic/%s'%url))
+            if not exists:
+                start_urls.append(self.startUrl+url)
+        for i in start_urls:
+            yield scrapy.Request(i, callback=self.parse)
+
 
     def parse(self, response):
         headUrl = self.headUrl
