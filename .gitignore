@@ -11,3 +11,6 @@ apidoc/
 .idea/
 venv/
 Content/
+Comic/
+ComicPdf/
+ghostdriver.log

@@ -1,24 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import scrapy
-
-# from renjm.items import RenjmItem
 import sys
-# from scrapy.selector import Selector
-import json
-import codecs
 import os
 import requests
 import importlib
 importlib.reload(sys)
 import img2pdf
-from PIL import Image
-from fpdf import FPDF
-# sys.setdefaultencoding('utf-8')
 ## 下载一拳超人漫画
-import io
-from io import BytesIO
 from lxml import html
+##图片爬虫，使用到了 PhantomJS，因为 爬取的网站 是动态加载的，直接爬取会出现加载没完全的情况。现在使用phantomjs来等待加载完成
 class ImageSpider(scrapy.Spider):
     name = "image"
     USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
@@ -34,6 +25,7 @@ class ImageSpider(scrapy.Spider):
             exists = os.path.exists(os.path.join(os.getcwd(), 'Comic/%s'%url))
             if not exists:
                 start_urls.append(self.startUrl+url)
+                # os.makedirs(os.path.join(os.getcwd(), 'Comic/%s'%url))
         for i in start_urls:
             yield scrapy.Request(i, callback=self.parse)
 
@@ -83,7 +75,9 @@ class ImageSpider(scrapy.Spider):
         self.comicTitle = comicImageUrl[0]
         _requests =scrapy.Request(comicImageUrl[0], callback=self.content_parse)
         _requests.meta['notHtml'] = True
-        _requests.meta['comicTitle'] = next_comics_url_list[0]
+        _requests.meta['comicTitle'] = []
+        if len(next_comics_url_list) != 0:
+            _requests.meta['comicTitle'] = next_comics_url_list[0]
         yield _requests
         if len(next_comics_url_list) !=0:
             self.comicTitle = next_comics_url_list[0]
@@ -95,6 +89,8 @@ class ImageSpider(scrapy.Spider):
 
     def content_parse(self, response):
         folderName = self.headUrl.split('/')[-2]
+        if len(response.meta['comicTitle']) == 0:
+            return
         title = response.meta['comicTitle']
         self.save(title, response, folderName)
 
@@ -115,14 +111,20 @@ class ImageSpider(scrapy.Spider):
             with open(fileName, 'wb') as f:
                 f.write(response.content)
         comicFolder = os.path.join(os.getcwd(), 'Comic')
+        comicPdfFolder = os.path.join(os.getcwd(), 'ComicPdf')
         for i in os.listdir(comicFolder):
             if i == ".DS_Store":
-                return
+                continue
             imgArray = []
+            if(os.path.exists(os.path.join(comicPdfFolder, i) + ".pdf")):
+                continue
             for f in os.listdir(os.path.join(comicFolder, i)):
                 if f.endswith(".jpg"):
                     imgArray.append(os.path.join(os.path.join(comicFolder, i), f))
+            if len(imgArray)==0:
+                continue
+            imgArray = sorted(imgArray,key=lambda x: int((x.split('_')[1]).split('.')[0]))
             pdf_bytes = img2pdf.convert(imgArray)
-            file = open(os.path.join(comicFolder, i) + ".pdf", 'wb')
+            file = open(os.path.join(comicPdfFolder, i) + ".pdf", 'wb')
             file.write(pdf_bytes)
             file.close()
