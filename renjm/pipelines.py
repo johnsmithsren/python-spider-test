@@ -11,15 +11,34 @@ import sys
 import importlib
 importlib.reload(sys)
 # sys.setdefaultencoding('utf-8')
-
-
+import os
+import img2pdf
 class RenjmPipeline(object):
+
+
     def process_item(self, item, spider):
         # now = time.strftime('%Y-%m-%d', time.localtime())
-        fileName = item['Title'][0] + '.txt'
-        with codecs.open(fileName, 'a', encoding='utf-8') as fp:
-            for i in item['Content'][0]:
-                str = json.dumps(i, ensure_ascii=False) + '\n'
-                str = unicode.encode(str, 'utf-8')
-                fp.write(str)
+        if item['Status'] == 200:
+            with open(item['Name'], 'wb') as f:
+                f.write(item['Content'])
+                f.close()
         return item
+
+    def close_spider(self, spider):
+        comicFolder = os.path.join(os.getcwd(), 'Comic')
+        comicPdfFolder = os.path.join(os.getcwd(), 'ComicPdf')
+        for i in os.listdir(comicFolder):
+            if i == ".DS_Store":
+                continue
+            imgArray = []
+            for f in os.listdir(os.path.join(comicFolder, i)):
+                if f.endswith(".jpg"):
+                    imgArray.append(os.path.join(os.path.join(comicFolder, i), f))
+            if len(imgArray) == 0:
+                continue
+            imgArray = sorted(imgArray, key=lambda x: int((x.split('_')[1]).split('.')[0]))
+            pdf_bytes = img2pdf.convert(imgArray)
+            file = open(os.path.join(comicPdfFolder, i) + ".pdf", 'wb')
+            file.write(pdf_bytes)
+            file.close()
+        return
