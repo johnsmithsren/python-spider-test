@@ -26,7 +26,7 @@ class ImageSpider(scrapy.Spider):
             exists = os.path.exists(os.path.join(os.getcwd(), 'Comic/%s'%url))
             if not exists:
                 start_urls.append(self.startUrl+url)
-                # os.makedirs(os.path.join(os.getcwd(), 'Comic/%s'%url))
+               # os.makedirs(os.path.join(os.getcwd(), 'Comic/%s'%url))
         for i in start_urls:
             self.headUrl = i
             yield scrapy.Request(i, callback=self.parse)

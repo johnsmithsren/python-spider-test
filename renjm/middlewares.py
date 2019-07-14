@@ -87,10 +87,11 @@ class RenjmDownloaderMiddleware(object):
             # 创建chrome启动选项
             chrome_options = webdriver.ChromeOptions()
             # 指定chrome启动类型为headless 并且禁用gpu
+            chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument('--headless')
             chrome_options.add_argument('--disable-gpu')
             # 调用环境变量指定的chrome浏览器创建浏览器对象
-            driver = webdriver.Chrome('/Users/renjm/project/scrapy/chromedriver',chrome_options=chrome_options)
+            driver = webdriver.Chrome(chrome_options=chrome_options)
             driver.get(request.url)
             # html = html + driver.page_source  # 第一页html储存在html字符串里
             print("访问" + request.url)
