@@ -10,6 +10,7 @@ import img2pdf
 ## 下载一拳超人漫画
 from lxml import html
 from renjm.items import RenjmItem
+import re
 ##图片爬虫，使用到了 PhantomJS，因为 爬取的网站 是动态加载的，直接爬取会出现加载没完全的情况。现在使用phantomjs来等待加载完成
 class ImageSpider(scrapy.Spider):
     name = "image"
@@ -39,16 +40,12 @@ class ImageSpider(scrapy.Spider):
         for i in com_count:
             com_url = i.xpath("./a/@href").extract()
             if (len(com_url)>3):
-                p = './a[%s]/text()' % (len(com_url) - 2)
-                l = len(com_url) - 2
-                comText = i.xpath(p).extract()
-                if len(comText) is 0:
-                    p = './a[%s]/text()' % (len(com_url) - 1)
-                    l = len(com_url) - 1
+                for index in range(len(com_url)):
+                    p = './a[%s]/text()' % index
                     comText = i.xpath(p).extract()
-                if comText[0] != '下一页' and comText[0] != '上一页':
-                    url = headUrl + com_url[l - 1]
-                    comics_url_list.append(url)
+                    if(len(comText)!=0 and re.match('第', comText[0])):
+                        url = headUrl + com_url[index-1]
+                        comics_url_list.append(url)
             else:
                 p = './a[%s]/text()' % (len(com_url) - 2)
                 l = len(com_url) - 2
