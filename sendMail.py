@@ -17,6 +17,8 @@ def sendEmail():
   comicPdfFolder = os.path.join(os.getcwd(), 'ComicPdf')
   m = MIMEMultipart()
   m.attach(textApart)
+  if not os.listdir(comicPdfFolder):
+      return
   for i in os.listdir(comicPdfFolder):
     if i == ".DS_Store":
       continue
@@ -34,4 +36,8 @@ def sendEmail():
     config.get('receiver'),
     m.as_string())
   server.quit()
+  for i in os.listdir(comicPdfFolder):
+    if i == ".DS_Store":
+      continue
+    pdfFile =os.remove(os.path.join(comicPdfFolder, i))
 sendEmail()

@@ -92,6 +92,7 @@ class RenjmDownloaderMiddleware(object):
             chrome_options.add_argument('--disable-gpu')
             # 调用环境变量指定的chrome浏览器创建浏览器对象
             driver = webdriver.Chrome(chrome_options=chrome_options)
+            driver.implicitly_wait(10)
             driver.get(request.url)
             # html = html + driver.page_source  # 第一页html储存在html字符串里
             print("访问" + request.url)
