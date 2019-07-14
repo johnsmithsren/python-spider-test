@@ -11,7 +11,7 @@ def sendEmail():
     config = yaml.load(f, Loader=yaml.BaseLoader)
   sender_email = config.get('sender')
   receiver_email = config.get('receiver')
-  password = config('password')
+  password = config.get('password')
   content = '一拳超人'
   textApart = MIMEText(content)
   comicPdfFolder = os.path.join(os.getcwd(), 'ComicPdf')
