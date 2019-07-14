@@ -4,29 +4,34 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 import os
 import yaml
-def sendEmail(sender,receiver,content,filePath):
+def sendEmail():
   config = {}
   base_path = os.path.dirname(os.path.abspath(__file__))
   with open(base_path + "/config.yaml") as f:
     config = yaml.load(f, Loader=yaml.BaseLoader)
-  sender_email = sender
-  receiver_email = receiver
-  password = config.password
-  content = content
+  sender_email = config.get('sender')
+  receiver_email = config.get('receiver')
+  password = config('password')
+  content = '一拳超人'
   textApart = MIMEText(content)
-  pdfFile = filePath
-  fileName = ''
-  pdfApart = MIMEApplication(open(pdfFile, 'rb').read())
-  pdfApart.add_header('Content-Disposition', 'attachment', filename=fileName)
+  comicPdfFolder = os.path.join(os.getcwd(), 'ComicPdf')
   m = MIMEMultipart()
   m.attach(textApart)
-  m.attach(pdfApart)
+  for i in os.listdir(comicPdfFolder):
+    if i == ".DS_Store":
+      continue
+    pdfFile =os.path.join(comicPdfFolder, i)
+    fileName = i
+    pdfApart = MIMEApplication(open(pdfFile, 'rb').read())
+    pdfApart.add_header('Content-Disposition', 'attachment', filename=fileName)
+    m.attach(pdfApart)
   m['Subject'] = 'comicPdf'
   context = ssl.create_default_context()
   server = smtplib.SMTP_SSL('smtp.qq.com')
   server.login(sender_email, password)
   server.sendmail(
-    sender,
-    receiver,
+    config.get('sender'),
+    config.get('receiver'),
     m.as_string())
   server.quit()
+sendEmail()
