@@ -14,13 +14,13 @@ import re
 ##图片爬虫，使用到了 PhantomJS，因为 爬取的网站 是动态加载的，直接爬取会出现加载没完全的情况。现在使用phantomjs来等待加载完成
 class ImageSpider(scrapy.Spider):
     name = "image"
-    USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
+    USER_AGENT = {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'}
     # start_urls = ['https://manhua.fzdm.com/132/151']
     startUrl = 'https://manhua.fzdm.com/132/'
     headUrl = 'https://manhua.fzdm.com/132/151/'
 
     def start_requests(self):
-        startUrls  =html.fromstring( requests.get(self.startUrl).text)
+        startUrls  =html.fromstring( requests.get(self.startUrl,headers=self.USER_AGENT).text)
         start = startUrls.xpath('//*[@id="content"]/li/a/@href')
         start_urls = []
         for url in start:

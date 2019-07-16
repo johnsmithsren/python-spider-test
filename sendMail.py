@@ -1,3 +1,5 @@
+#coding:utf-8
+#-*-coding:utf-8 -*-
 import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
