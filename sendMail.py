@@ -17,6 +17,7 @@ def sendEmail():
   content = '一拳超人'
   textApart = MIMEText(content)
   comicPdfFolder = os.path.join(os.getcwd(), 'ComicPdf')
+  comicFolder = os.path.join(os.getcwd(),'Comic')
   m = MIMEMultipart()
   m.attach(textApart)
   if not os.listdir(comicPdfFolder):
@@ -41,5 +42,11 @@ def sendEmail():
   for i in os.listdir(comicPdfFolder):
     if i == ".DS_Store":
       continue
-    pdfFile =os.remove(os.path.join(comicPdfFolder, i))
+    os.remove(os.path.join(comicPdfFolder, i))
+    path = i.split('.')[0]
+    comicPath = os.path.join(comicFolder, path)
+    for j in os.listdir(comicPath):
+      if j == ".DS_Store":
+        continue
+      os.remove(os.path.join(comicPath, j))
 sendEmail()
