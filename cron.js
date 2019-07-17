@@ -1,6 +1,6 @@
 const cron = require('node-cron');
 const { exec } = require('child_process');
-const task = cron.schedule('00 30 15 * * *', () =>  {
+const task = cron.schedule('00 30 09 * * *', () =>  {
   // 输出当前目录（不一定是代码所在的目录）下的文件和文件夹
 exec('python sendMail.py >> sendMail.log', (err, stdout, stderr) => {
 })
@@ -9,7 +9,7 @@ exec('python sendMail.py >> sendMail.log', (err, stdout, stderr) => {
    timezone: "Asia/Shanghai"
 });
 
-const task2 = cron.schedule('00 00 15 * * *', () =>  {
+const task2 = cron.schedule('00 14 11 * * *', () =>  {
   // 输出当前目录（不一定是代码所在的目录）下的文件和文件夹
 exec('python begin.py >> run.log', (err, stdout, stderr) => {
 })
@@ -26,6 +26,6 @@ exec('python begin.py >> run.log', (err, stdout, stderr) => {
 //}, {
 //  scheduled: false
 //});
-task.start();
+//task.start();
 task2.start()
 //task3.start()

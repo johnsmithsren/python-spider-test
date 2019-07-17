@@ -107,8 +107,6 @@ class ImageSpider(scrapy.Spider):
         title = response.meta['comicTitle']
         document = os.path.join(os.getcwd(), 'Comic')
         folder_path = os.path.join(document, folderName)
-        print('\n>>>>>>>>>>>>>>>>>>> folder_path  <<<<<<<<<<<<<<<<<<<<' +
-              folder_path)
         exists = os.path.exists(folder_path)
         if not exists:
             print('create document: ' + folderName)
