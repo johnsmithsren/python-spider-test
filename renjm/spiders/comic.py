@@ -16,25 +16,27 @@ class ImageSpider(scrapy.Spider):
     name = "image"
     USER_AGENT = {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'}
     # start_urls = ['https://manhua.fzdm.com/132/151']
-    startUrl = 'https://manhua.fzdm.com/132/'
+    startUrls = ['https://manhua.fzdm.com/132/','https://manhua.fzdm.com/2/']
     headUrl = 'https://manhua.fzdm.com/132/151/'
 
     def start_requests(self):
-        startUrls  =html.fromstring( requests.get(self.startUrl,headers=self.USER_AGENT).text)
-        start = startUrls.xpath('//*[@id="content"]/li/a/@href')
         start_urls = []
-        for url in start:
-            exists = os.path.exists(os.path.join(os.getcwd(), 'Comic/%s'%url))
-            if not exists:
-                start_urls.append(self.startUrl+url)
-               # os.makedirs(os.path.join(os.getcwd(), 'Comic/%s'%url))
+        for _startUrl in self.startUrls:
+            startUrls  =html.fromstring( requests.get(_startUrl,headers=self.USER_AGENT).text)
+            start = startUrls.xpath('//*[@id="content"]/li/a/@href')
+
+            for url in start:
+                exists = os.path.exists(os.path.join(os.getcwd(), 'Comic/%s'%url))
+                if not exists:
+                    start_urls.append(_startUrl+url)
+                    # os.makedirs(os.path.join(os.getcwd(), 'Comic/%s'%url))
         for i in start_urls:
             self.headUrl = i
             yield scrapy.Request(i, callback=self.parse)
 
 
     def parse(self, response):
-        headUrl = self.headUrl
+        headUrl = response.url
         comics_url_list = []
         com_count = response.xpath("//*[@id='pjax-container']/div[@class='navigation']")
         for i in com_count:
@@ -63,12 +65,13 @@ class ImageSpider(scrapy.Spider):
             print('>>>>>>>> 动漫解析:' + url)
             _requests = scrapy.Request(url, callback=self.comics_parse)
             _requests.meta['PhantomJS'] = True
+            _requests.meta['responseUrl'] = response.url
             yield _requests
 
     def comics_parse(self, response):
         comicImageUrl = response.xpath('//*[@id="mhpic"]/@src').extract()
         next_com_urls = response.xpath("//*[@id='pjax-container']/div[@class='navigation']")
-        headUrl =  self.headUrl
+        headUrl =  response.meta['responseUrl']
         next_comics_url_list = []
         for i in next_com_urls:
             com_url = i.xpath("./a/@href").extract()
@@ -83,25 +86,28 @@ class ImageSpider(scrapy.Spider):
                 url = headUrl +com_url[l-1]
                 next_comics_url_list.append(url)
         print(comicImageUrl)
-        self.comicTitle = comicImageUrl[0]
         _requests =scrapy.Request(comicImageUrl[0], callback=self.content_parse)
         _requests.meta['notHtml'] = True
         _requests.meta['comicTitle'] = []
+        _requests.meta['responseUrl'] = response.meta['responseUrl']
         if len(next_comics_url_list) != 0:
             _requests.meta['comicTitle'] = next_comics_url_list[0]
         if len(next_comics_url_list) == 0 and len(comicImageUrl) != 0:
             _requests.meta['comicTitle'] ='index_%s.html'% str(int(response.url.split('_')[1].split('.')[0])+1)
         yield _requests
+        self.comicTitle = comicImageUrl[0]
+        self.headUrl = response.url
         if len(next_comics_url_list) !=0:
             self.comicTitle = next_comics_url_list[0]
             _requests = scrapy.Request(next_comics_url_list[0], callback=self.comics_parse)
             _requests.meta['PhantomJS'] = True
             _requests.meta['comicTitle'] = next_comics_url_list[0]
+            _requests.meta['responseUrl'] = response.meta['responseUrl']
             yield _requests
 
 
     def content_parse(self, response):
-        folderName = self.headUrl.split('/')[-2]
+        folderName = response.meta['responseUrl'].split('/')[-2]
         if len(response.meta['comicTitle']) == 0:
             return
         title = response.meta['comicTitle']
