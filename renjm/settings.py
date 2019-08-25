@@ -1,3 +1,9 @@
+'''
+@Auther: renjm
+@Date: 2019-07-17 10:07:36
+@LastEditTime: 2019-08-25 16:13:05
+@Description: 
+'''
 # -*- coding: utf-8 -*-
 
 # Scrapy settings for renjm project
@@ -13,9 +19,11 @@ BOT_NAME = 'renjm'
 
 SPIDER_MODULES = ['renjm.spiders']
 NEWSPIDER_MODULE = 'renjm.spiders'
-
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'}
+# USER_AGENT = {
+#     'User-Agent':
+#     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'
+# }
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
