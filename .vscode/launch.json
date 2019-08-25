@@ -8,7 +8,7 @@
       "name": "Python: Current File",
       "type": "python",
       "request": "launch",
-      "program": "${workspaceFolder}/begin.py"
+      "program": "${workspaceFolder}/sendMail.py"
     }
     // {
     //   "name": "Python: Attach",

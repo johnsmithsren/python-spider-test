@@ -1,7 +1,7 @@
 '''
 @Auther: renjm
 @Date: 2019-07-18 11:51:47
-@LastEditTime: 2019-08-25 17:44:08
+@LastEditTime: 2019-08-25 20:28:03
 @Description: 
 '''
 # -*- coding: utf-8 -*-
@@ -53,7 +53,9 @@ class ImageSpider(scrapy.Spider):
             for i in start_urls:
                 self.headUrl = i
                 self.folderTitle = comicTitle
-                yield scrapy.Request(i, callback=self.parse)
+                p = scrapy.Request(i, callback=self.parse)
+                p.meta['folderTitle'] = comicTitle
+                yield p
 
     def parse(self, response):
         headUrl = response.url
@@ -87,6 +89,7 @@ class ImageSpider(scrapy.Spider):
             _requests = scrapy.Request(url, callback=self.comics_parse)
             _requests.meta['PhantomJS'] = True
             _requests.meta['responseUrl'] = response.url
+            _requests.meta['folderTitle'] = response.meta['folderTitle']
             yield _requests
 
     def comics_parse(self, response):
@@ -113,6 +116,7 @@ class ImageSpider(scrapy.Spider):
         _requests.meta['notHtml'] = True
         _requests.meta['comicTitle'] = []
         _requests.meta['responseUrl'] = response.meta['responseUrl']
+        _requests.meta['folderTitle'] = response.meta['folderTitle']
         if len(next_comics_url_list) != 0:
             _requests.meta['comicTitle'] = next_comics_url_list[0]
         if len(next_comics_url_list) == 0 and len(comicImageUrl) != 0:
@@ -128,6 +132,7 @@ class ImageSpider(scrapy.Spider):
             _requests.meta['PhantomJS'] = True
             _requests.meta['comicTitle'] = next_comics_url_list[0]
             _requests.meta['responseUrl'] = response.meta['responseUrl']
+            _requests.meta['folderTitle'] = response.meta['folderTitle']
             yield _requests
 
     def content_parse(self, response):
@@ -135,7 +140,8 @@ class ImageSpider(scrapy.Spider):
         if len(response.meta['comicTitle']) == 0:
             return
         title = response.meta['comicTitle']
-        document = os.path.join(os.getcwd(), 'Comic/%s' % self.folderTitle)
+        folderTitle = response.meta['folderTitle']
+        document = os.path.join(os.getcwd(), 'Comic/%s' % folderTitle)
         folder_path = os.path.join(document, folderName)
         exists = os.path.exists(folder_path)
         if not exists:
