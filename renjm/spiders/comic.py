@@ -155,21 +155,3 @@ class ImageSpider(scrapy.Spider):
         item['Content'] = res.content
         item['Status'] = res.status_code
         yield item
-
-    # def save(self, title, content, folderName):
-    # document = os.path.join(os.getcwd(), 'Comic')
-    # folder_path = os.path.join(document, folderName)
-    # print('\n>>>>>>>>>>>>>>>>>>> folder_path  <<<<<<<<<<<<<<<<<<<<' +
-    #       folder_path)
-    # exists = os.path.exists(folder_path)
-    # if not exists:
-    #     print('create document: ' + folderName)
-    #     os.makedirs(folder_path)
-    # fileName = folder_path + '/' + title.split('/')[-1] + '.jpg'
-    # url = content.url
-    # response = requests.get(url)
-    # item = RenjmItem()
-    # item['name'] = fileName
-    # item['content'] =response.content
-    # item['status'] = response.status_code
-    # yield item
