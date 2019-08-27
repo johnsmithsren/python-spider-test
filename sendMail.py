@@ -1,7 +1,7 @@
 '''
 @Auther: renjm
 @Date: 2019-08-13 13:13:59
-@LastEditTime: 2019-08-26 10:02:29
+@LastEditTime: 2019-08-27 13:23:16
 @Description: 
 '''
 #coding:utf-8
@@ -14,6 +14,7 @@ import os
 import yaml
 import shutil
 import requests
+import oss2  # oss2包 连接阿里云OSS的工具
 
 
 def sendEmail():
@@ -22,6 +23,10 @@ def sendEmail():
     with open(base_path + "/config.yaml") as f:
         config = yaml.load(f, Loader=yaml.BaseLoader)
     sender_email = config.get('sender')
+    auth = oss2.Auth(config['oss']['accessKeyId'],
+                     config['oss']['accessKeySecret'])  #详见文档
+    endpoint = 'http://oss-cn-shanghai.aliyuncs.com'  #  地址
+    bucket = oss2.Bucket(auth, endpoint, config['oss']['bucket'])  # 项目名称
     # receiver_email = config.get('receiver')
     m = MIMEMultipart()
     m['Subject'] = '风之动漫pdf版'
@@ -38,7 +43,6 @@ def sendEmail():
         _comicPdfFolder = os.path.join(comicPdfFolder, i)
         _comicFolder = os.path.join(comicFolder, i)
         for file in os.listdir(_comicPdfFolder):
-
             pdfFile = os.path.join(_comicPdfFolder, file)
             fileName = file
             pdfApart = MIMEApplication(open(pdfFile, 'rb').read())
@@ -47,13 +51,14 @@ def sendEmail():
             m.attach(pdfApart)
             content = ' %s 第%s话' % (i, file.split('.')[0])
             textApart = MIMEText(content)
+            bucket.put_object(file, open(pdfFile, 'rb').read())
             # 这里发送请求去更新数据库中关于pdf的文件记录，后续继续调整
-            requests.post(
-                'http://127.0.0.1:3001/create/pdf',
-                data={
-                    'title': i,
-                    'path': file
-                })
+            # requests.post(
+            #     'http://127.0.0.1:3001/create/pdf',
+            #     data={
+            #         'title': i,
+            #         'path': file
+            #     })
             m.attach(textApart)
         # 邮件内容整理好之后，清空pdf文件夹数据
         for _file in os.listdir(_comicPdfFolder):
@@ -69,7 +74,7 @@ def sendEmail():
                 if j == ".DS_Store":
                     continue
                 os.remove(os.path.join(comicPath, j))
-    ## 发送邮件
+    # 发送邮件
     server = smtplib.SMTP_SSL('smtp.qq.com')
     server.login(sender_email, password)
     server.sendmail(
