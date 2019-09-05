@@ -1,7 +1,7 @@
 '''
 @Auther: renjm
 @Date: 2019-08-13 13:13:59
-@LastEditTime: 2019-08-27 13:23:16
+@LastEditTime: 2019-09-05 11:50:12
 @Description: 
 '''
 #coding:utf-8
@@ -32,7 +32,6 @@ def sendEmail():
     m['Subject'] = '风之动漫pdf版'
     m['To'] = config.get('receiver')
     m['From'] = sender_email
-    password = config.get('password')
     comicPdfFolder = os.path.join(os.getcwd(), 'ComicPdf')
     comicFolder = os.path.join(os.getcwd(), 'Comic')
     if not os.listdir(comicPdfFolder):
@@ -51,14 +50,16 @@ def sendEmail():
             m.attach(pdfApart)
             content = ' %s 第%s话' % (i, file.split('.')[0])
             textApart = MIMEText(content)
-            bucket.put_object(file, open(pdfFile, 'rb').read())
+            bucket.put_object(
+                os.path.join('comic', file),
+                open(pdfFile, 'rb').read())
             # 这里发送请求去更新数据库中关于pdf的文件记录，后续继续调整
-            # requests.post(
-            #     'http://127.0.0.1:3001/create/pdf',
-            #     data={
-            #         'title': i,
-            #         'path': file
-            #     })
+            requests.post(
+                'http://127.0.0.1:3001/create/pdf',
+                data={
+                    'title': i,
+                    'path': file
+                })
             m.attach(textApart)
         # 邮件内容整理好之后，清空pdf文件夹数据
         for _file in os.listdir(_comicPdfFolder):
