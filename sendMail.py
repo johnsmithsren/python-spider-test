@@ -1,7 +1,7 @@
 '''
 @Auther: renjm
 @Date: 2019-08-13 13:13:59
-@LastEditTime: 2019-09-05 13:08:47
+@LastEditTime: 2019-09-05 13:14:39
 @Description: 
 '''
 #coding:utf-8
@@ -58,7 +58,7 @@ def sendEmail():
                 'http://127.0.0.1:3001/create/pdf',
                 data={
                     'title': i,
-                    'path': file
+                    'path': os.path.join('comic', file)
                 })
             m.attach(textApart)
         # 邮件内容整理好之后，清空pdf文件夹数据
@@ -68,10 +68,12 @@ def sendEmail():
             os.remove(os.path.join(_comicPdfFolder, _file))
             path = _file.split('.')[0]
             comicPath = os.path.join(_comicFolder, path)
-            for j in os.listdir(comicPath):
-                if j == ".DS_Store":
-                    continue
-                os.remove(os.path.join(comicPath, j))
+            comicExists = os.path.exists(comicPath)
+            if comicExists:
+                for j in os.listdir(comicPath):
+                    if j == ".DS_Store":
+                        continue
+                    os.remove(os.path.join(comicPath, j))
     # 发送邮件
     password = config.get('password')
     server = smtplib.SMTP_SSL('smtp.qq.com')
