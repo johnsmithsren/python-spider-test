@@ -1,7 +1,7 @@
 '''
 @Auther: renjm
 @Date: 2019-08-13 13:13:59
-@LastEditTime: 2019-09-05 13:14:39
+@LastEditTime: 2019-09-05 13:59:11
 @Description: 
 '''
 #coding:utf-8
@@ -51,7 +51,7 @@ def sendEmail():
             content = ' %s 第%s话' % (i, file.split('.')[0])
             textApart = MIMEText(content)
             bucket.put_object(
-                os.path.join('comic', file),
+                os.path.join('/comic', file),
                 open(pdfFile, 'rb').read())
             # 这里发送请求去更新数据库中关于pdf的文件记录，后续继续调整
             requests.post(
