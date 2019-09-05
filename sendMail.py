@@ -1,7 +1,7 @@
 '''
 @Auther: renjm
 @Date: 2019-08-13 13:13:59
-@LastEditTime: 2019-09-05 11:50:12
+@LastEditTime: 2019-09-05 13:08:47
 @Description: 
 '''
 #coding:utf-8
@@ -65,9 +65,6 @@ def sendEmail():
         for _file in os.listdir(_comicPdfFolder):
             if _file == ".DS_Store":
                 continue
-            shutil.copyfile(
-                os.path.join(_comicPdfFolder, _file),
-                os.path.join('/Users/renjm/project/react/blogreact/', _file))
             os.remove(os.path.join(_comicPdfFolder, _file))
             path = _file.split('.')[0]
             comicPath = os.path.join(_comicFolder, path)
@@ -76,6 +73,7 @@ def sendEmail():
                     continue
                 os.remove(os.path.join(comicPath, j))
     # 发送邮件
+    password = config.get('password')
     server = smtplib.SMTP_SSL('smtp.qq.com')
     server.login(sender_email, password)
     server.sendmail(
