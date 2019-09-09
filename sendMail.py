@@ -1,7 +1,7 @@
 '''
 @Auther: renjm
 @Date: 2019-08-13 13:13:59
-@LastEditTime: 2019-09-05 13:59:42
+@LastEditTime: 2019-09-09 20:54:07
 @Description: 
 '''
 #coding:utf-8
@@ -34,6 +34,7 @@ def sendEmail():
     m['From'] = sender_email
     comicPdfFolder = os.path.join(os.getcwd(), 'ComicPdf')
     comicFolder = os.path.join(os.getcwd(), 'Comic')
+    sendEmailFlag = False
     if not os.listdir(comicPdfFolder):
         return
     for i in os.listdir(comicPdfFolder):
@@ -61,6 +62,7 @@ def sendEmail():
                     'path': os.path.join('/comic', file)
                 })
             m.attach(textApart)
+            sendEmailFlag = True
         # 邮件内容整理好之后，清空pdf文件夹数据
         for _file in os.listdir(_comicPdfFolder):
             if _file == ".DS_Store":
@@ -74,13 +76,13 @@ def sendEmail():
                     if j == ".DS_Store":
                         continue
                     os.remove(os.path.join(comicPath, j))
-    # 发送邮件
-    password = config.get('password')
-    server = smtplib.SMTP_SSL('smtp.qq.com')
-    server.login(sender_email, password)
-    server.sendmail(
-        config.get('sender'), config.get('receiver'), m.as_string())
-    server.quit()
+    if sendEmailFlag:
+        password = config.get('password')
+        server = smtplib.SMTP_SSL('smtp.qq.com')
+        server.login(sender_email, password)
+        server.sendmail(
+            config.get('sender'), config.get('receiver'), m.as_string())
+        server.quit()
 
 
 if __name__ == '__main__':
