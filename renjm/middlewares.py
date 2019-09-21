@@ -1,3 +1,9 @@
+'''
+@Auther: renjm
+@Date: 2019-08-13 13:13:59
+@LastEditTime: 2019-08-13 13:13:59
+@Description: 
+'''
 # -*- coding: utf-8 -*-
 
 # Define here the models for your spider middleware
@@ -8,6 +14,7 @@
 from scrapy import signals
 from scrapy.http import HtmlResponse
 from selenium import webdriver
+
 
 class RenjmSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -91,12 +98,18 @@ class RenjmDownloaderMiddleware(object):
             chrome_options.add_argument('--headless')
             chrome_options.add_argument('--disable-gpu')
             # 调用环境变量指定的chrome浏览器创建浏览器对象
-            driver = webdriver.Chrome('/Users/renjm/project/scrapy/chromedriver',chrome_options=chrome_options)
+            driver = webdriver.Chrome(
+                '/Users/renjm/project/scrapy/chromedriver',
+                chrome_options=chrome_options)
             driver.implicitly_wait(30)
             driver.get(request.url)
             # html = html + driver.page_source  # 第一页html储存在html字符串里
             print("访问" + request.url)
-            return HtmlResponse(request.url, body=driver.page_source, encoding='utf-8', request=request)
+            return HtmlResponse(
+                request.url,
+                body=driver.page_source,
+                encoding='utf-8',
+                request=request)
         return None
 
     def process_response(self, request, response, spider):
@@ -120,4 +133,3 @@ class RenjmDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
-

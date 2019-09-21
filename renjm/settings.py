@@ -1,7 +1,7 @@
 '''
 @Auther: renjm
 @Date: 2019-07-17 10:07:36
-@LastEditTime: 2019-08-25 16:13:05
+@LastEditTime: 2019-09-20 10:04:21
 @Description: 
 '''
 # -*- coding: utf-8 -*-
@@ -26,7 +26,7 @@ NEWSPIDER_MODULE = 'renjm.spiders'
 # }
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = False
+ROBOTSTXT_OBEY = True
 FEED_EXPORT_ENCODING = 'utf-8'
 CONCURRENT_REQUESTS = 5
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
@@ -35,8 +35,8 @@ CONCURRENT_REQUESTS = 5
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 6
-RETRY_ENABLED = False
+DOWNLOAD_DELAY = 10
+RETRY_ENABLED = True
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
